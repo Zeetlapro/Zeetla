@@ -1272,7 +1272,7 @@ def format_account_output(result):
         output_str += f"    Username: {fb_username_display}\n"
         output_str += f"    Profile: {fb_link_display}\n"
         
-        output_str += "\n╰┈➤ POWERED BY – @SKYWINTER\n"
+        output_str += "\n╰┈➤ POWERED BY – @TAWIN MARKET\n"
                
     elif result["status"] == "failed":
         output_str += "-------------------------------------------------\n\n"
@@ -1284,14 +1284,14 @@ def format_account_output(result):
             output_str += f"✒ Reason: ACCOUNT DOESN'T EXIST!\n"
         else:
             output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – @SKYWINTER\n"
+        output_str += "\n╰┈➤ POWERED BY – @TAWIN MARKET\n"
 
     elif result["status"] == "captcha":
         output_str += "-------------------------------------------------\n\n"
         output_str += "[⚠️] CAPTCHA Triggered\n"
         output_str += f"✒ Account: {result['username']}:{result['password']}\n"
         output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – @SKYWINTER\n"
+        output_str += "\n╰┈➤ POWERED BY – @TAWIN MARKET\n"
         
     elif result["status"] == "error":
         output_str += "-------------------------------------------------\n\n"
@@ -1299,7 +1299,7 @@ def format_account_output(result):
         output_str += f"✒ Account: {result['username']}:{result['password']}\n"
         output_str += f"✒ Error Type: {result['type']}\n"
         output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – @SKYWINTER\n"
+        output_str += "\n╰┈➤ POWERED BY – @TAWIN MARKET\n"
             
     output_str += f"\n{'-'*80}\n"
     return output_str
@@ -1528,7 +1528,7 @@ def save_account_details(account, details, codm_info=None, password=None, game_c
             f.write(f"    Username: {fb_username_display}\n")
             f.write(f"    Profile: {fb_link_display}\n")
 
-            f.write("\n╰┈➤ CHECKER BY – @SKYWINTER Zeel\n")
+            f.write("\n╰┈➤ CHECKER BY – @TAWIN MARKET\n")
             f.write("\n" + "-" * 80 + "\n\n")
 
         # --- Save to individual lists ---
