@@ -1,32 +1,10 @@
 import os
-import sys
-import time
-import json
-import random
-import signal
-import hashlib
-import logging
 import platform
 import subprocess
-import threading
-import urllib.parse
-from datetime import datetime
-from threading import Lock
-from concurrent.futures import ThreadPoolExecutor
-
+import sys
 import requests
-import cloudscraper
-from Crypto.Cipher import AES
-
-import colorama
-from colorama import Fore, Style, Back
-
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-from rich.box import Box, DOUBLE
-from rich.live import Live
-from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
+import hashlib
+import json
 
 # ---------------------------
 # ฟังก์ชันดึง HWID จาก Termux
@@ -116,6 +94,30 @@ print("\n=== โปรแกรมหลักของคุณกำลัง�
 #   <<< วางโค้ดหลักของคุณตรงนี้ >>>
 # ----------------------------------------
 
+import os
+import sys
+import time
+import random
+import hashlib
+import json
+import logging
+import urllib.parse
+import signal
+from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
+from Crypto.Cipher import AES
+import requests
+import cloudscraper
+import colorama
+import threading
+from colorama import Fore, Style, Back
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.box import Box, DOUBLE
+from rich.live import Live
+from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
 
 checked_accounts = set()
 
@@ -132,8 +134,6 @@ CODM_REGIONS = {
     'TH': {'name': 'Thailand', 'code': '66', 'flag': '🇹🇭'},
     'SG': {'name': 'Singapore', 'code': '65', 'flag': '🇸🇬'},
 }
-
-CREDIT = "@Crepe"
 
 class Colors:
     LIGHTGREEN_EX = colorama.Fore.LIGHTGREEN_EX
@@ -1272,7 +1272,7 @@ def format_account_output(result):
         output_str += f"    Username: {fb_username_display}\n"
         output_str += f"    Profile: {fb_link_display}\n"
         
-        output_str += "\n╰┈➤ POWERED BY – {CREDIT}\n"
+        output_str += "\n╰┈➤ POWERED BY – Crepe\n"
                
     elif result["status"] == "failed":
         output_str += "-------------------------------------------------\n\n"
@@ -1284,14 +1284,14 @@ def format_account_output(result):
             output_str += f"✒ Reason: ACCOUNT DOESN'T EXIST!\n"
         else:
             output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – {CREDIT}\n"
+        output_str += "\n╰┈➤ POWERED BY – Crepe\n"
 
     elif result["status"] == "captcha":
         output_str += "-------------------------------------------------\n\n"
         output_str += "[⚠️] CAPTCHA Triggered\n"
         output_str += f"✒ Account: {result['username']}:{result['password']}\n"
         output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – {CREDIT}\n"
+        output_str += "\n╰┈➤ POWERED BY – Crepe\n"
         
     elif result["status"] == "error":
         output_str += "-------------------------------------------------\n\n"
@@ -1299,7 +1299,7 @@ def format_account_output(result):
         output_str += f"✒ Account: {result['username']}:{result['password']}\n"
         output_str += f"✒ Error Type: {result['type']}\n"
         output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – {CREDIT}\n"
+        output_str += "\n╰┈➤ POWERED BY – Crepe\n"
             
     output_str += f"\n{'-'*80}\n"
     return output_str
@@ -1528,7 +1528,7 @@ def save_account_details(account, details, codm_info=None, password=None, game_c
             f.write(f"    Username: {fb_username_display}\n")
             f.write(f"    Profile: {fb_link_display}\n")
 
-            f.write("\n╰┈➤ CHECKER BY – {CREDIT}\n")
+            f.write("\n╰┈➤ CHECKER BY – Crepe\n")
             f.write("\n" + "-" * 80 + "\n\n")
 
         # --- Save to individual lists ---
@@ -2053,7 +2053,7 @@ def select_input_file():
                 "[!] READ THIS TO AVOID ASKING QUESTIONS!",
                 "[*] DataDome ARE AUTO-GENERATED !",
                 "[*] IF IP IS BLOCKED, CHANGE YOUR IP!",
-                "[*] AI & {CREDIT}\n"
+                "[*] AI & Crepe"
             ],
             "restart_message": "[!] RESTART THE CHECKER AND ADD YOUR TXT FILES TO THE COMBO FOLDER!"
         },
@@ -2063,7 +2063,7 @@ def select_input_file():
                 "[!] กรุณาอ่านก่อนใช้งาน เพื่อลดปัญหาและคำถามซ้ำ!",
                 "[*] DataDome จะถูกสร้างให้อัตโนมัติเมื่อใช้งานโปรแกรม!",
                 "[*] หาก IP ถูกบล็อก ให้เปลี่ยน IP ทันที!",
-                "[*] AI & {CREDIT}\n"
+                "[*] AI & Crepe"
             ],
             "restart_message": "[!] กรุณารีสตาร์ทโปรแกรม และนำไฟล์ .txt ของคุณใส่ไว้ในโฟลเดอร์ Combo!"
         },
@@ -2331,7 +2331,7 @@ def main():
     
     final_stats = live_stats.get_stats()
     print("\n" + "="*80)
-    logger.info(f"[FINAL STATS] VALID: {final_stats['valid']} | INVALID: {final_stats['invalid']} | CLEAN: {final_stats['clean']} | NOT CLEAN: {final_stats['not_clean']} | HAS CODM: {final_stats['has_codm']} | NO CODM: {final_stats['no_codm']} -> config {CREDIT}\n")
+    logger.info(f"[FINAL STATS] VALID: {final_stats['valid']} | INVALID: {final_stats['invalid']} | CLEAN: {final_stats['clean']} | NOT CLEAN: {final_stats['not_clean']} | HAS CODM: {final_stats['has_codm']} | NO CODM: {final_stats['no_codm']} -> config Crepe")
     print("="*80)
 
 if __name__ == "__main__":
