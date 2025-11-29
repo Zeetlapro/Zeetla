@@ -67,8 +67,8 @@ class KeyAuth:
 # เริ่มการเชื่อมต่อ KeyAuth
 # ---------------------------
 keyauthapp = KeyAuth(
-    name="Idlaxcongpom's Application",       # ชื่อแอปใน KeyAuth
-    ownerid="DHJ1onvedO",    # Owner ID
+    name="Cihaysiwkr",       # ชื่อแอปใน KeyAuth
+    ownerid="zh99PVi1um",    # Owner ID
     version="1.0"            # เวอร์ชัน
 )
 
